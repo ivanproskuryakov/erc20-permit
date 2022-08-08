@@ -1,32 +1,16 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8;
+pragma solidity ^0.6.12;
 
-import "./IERC20Permit.sol";
+import "./Fabric.sol";
 
 contract Vault {
-    IERC20Permit public immutable token;
+    using Fabric for bytes32;
 
-    constructor(address _token) {
-        token = IERC20Permit(_token);
+    function getVault(bytes32  _data) public view returns (address) {
+        return _data.getVault();
     }
 
-    function deposit(uint amount) external {
-        token.transferFrom(msg.sender, address(this), amount);
-    }
-
-    /*
-    function permit(
-        address owner,
-        address spender,
-        uint256 value,
-        uint256 deadline,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    )
-    */
-    function depositWithPermit(uint amount, uint deadline, uint8 v, bytes32 r, bytes32 s) external {
-        token.permit(msg.sender, address(this), amount, deadline, v, r, s);
-        token.transferFrom(msg.sender, address(this), amount);
+    function executeVault(bytes32 _data, IERC20 _token, address _to) public {
+        _data.executeVault(_token, _to);
     }
 }

@@ -120,15 +120,13 @@ contract ERC20OrderRouter {
             _data
         );
 
-        console.log('ERC20OrderRouter::depositToken');
-        console.log('_module (vault)...', _module, IERC20(_inputToken).balanceOf(_module));
-        console.log('_inputToken (token) ...', _inputToken, IERC20(_inputToken).balanceOf(_inputToken));
-        console.log('msg.sender (relay) ...', msg.sender, IERC20(_inputToken).balanceOf(msg.sender));
-        console.log('vaultAddress ...', vaultAddress, IERC20(_inputToken).balanceOf(vaultAddress));
+//        console.log('.....');
+//        console.log('vaultAddress >>>>', vaultAddress);
+//        console.log('.....');
 
         IERC20(_inputToken).transferFrom(
             msg.sender,
-            _module,
+            vaultAddress,
             _amount
         );
 

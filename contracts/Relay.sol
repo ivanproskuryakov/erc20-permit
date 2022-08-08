@@ -44,21 +44,14 @@ contract Relay {
     ) external {
         token.permit(msg.sender, address(this), amount, deadline, v, r, s);
         token.transferFrom(address(msg.sender), address(this), amount);
-//        token.approve(address(router), amount);
-//
-        console.log('...');
-        console.log('.', token.balanceOf(msg.sender));
-        console.log('.', token.balanceOf(address(this)));
-        console.log('.', token.balanceOf(address(router)));
-        console.log('...');
 
         token.approve(address(router), amount);
 
         router.depositToken(
-            amount, // V
-            vault,  // V
-            token,  // V
-            payable(address(msg.sender)), // V
+            amount,
+            vault,
+            token,
+            payable(address(msg.sender)),
             _witness,
             _data,
             _secret

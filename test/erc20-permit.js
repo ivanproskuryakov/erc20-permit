@@ -1,11 +1,11 @@
 const Web3 = require('web3')
-const { expect } = require("chai")
+const {expect} = require('chai')
 const {ethers} = require('hardhat')
 
 const web3 = new Web3()
 const BN = web3.utils.BN;
 
-async function getPermitSignature(signer, token, spender, value, deadline) {
+const getPermitSignature = async (signer, token, spender, value, deadline) => {
     const [nonce, name, version, chainId] = await Promise.all([
         token.nonces(signer.address),
         token.name(),
@@ -58,17 +58,12 @@ async function getPermitSignature(signer, token, spender, value, deadline) {
 
 describe('ERC20Permit', function () {
     it('ERC20 permit', async function () {
-        const accounts = await ethers.getSigners()
-        const privatekey = 'ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
-
-        const signer = accounts[0]
-
         const Token = await ethers.getContractFactory('Token')
         const token = await Token.deploy()
         await token.deployed()
 
         const Vault = await ethers.getContractFactory('Vault')
-        const vault = await Vault.deploy(token.address)
+        const vault = await Vault.deploy()
         await vault.deployed()
 
         const GelatoPineCore = await ethers.getContractFactory('GelatoPineCore')
@@ -87,9 +82,12 @@ describe('ERC20Permit', function () {
         )
         await relay.deployed()
 
-        const amount = 1000
-        await token.mint(signer.address, amount)
+        const accounts = await ethers.getSigners()
+        const privatekey = 'ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
+        const signer = accounts[0]
 
+        const amount = 1000;
+        await token.mint(signer.address, amount)
         const deadline = ethers.constants.MaxUint256
 
         const {v, r, s} = await getPermitSignature(
@@ -99,23 +97,20 @@ describe('ERC20Permit', function () {
             amount,
             deadline
         )
-
         const data = web3.eth.abi.encodeParameters(
-            ['address', 'uint256', 'uint256'],
+            ['address', 'uint256'],
             [
-                token.address,               // Buy TOKEN 1
-                new BN(amount),              // Get at least 300 Tokens
-                new BN(10)                   // Pay 10 WEI to sender
+                signer.address,
+                amount,
             ]
+        );
+        const vaultAddress = await gelatoPineCore.vaultOfOrder(
+            vault.address,               // Limit orders module
+            token.address,               // Sell token 1
+            signer.address,              // Owner of the order
+            signer.address,              // Witness address
+            data
         )
-
-
-        console.log('signer', signer.address);
-        console.log('token', token.address);
-        console.log('vault', vault.address);
-        console.log('gelatoPineCore', gelatoPineCore.address);
-        console.log('router', router.address);
-        console.log('relay', relay.address);
 
         await relay.transferWithPermit(
             amount,
@@ -128,10 +123,6 @@ describe('ERC20Permit', function () {
             web3.utils.soliditySha3(privatekey),
         )
 
-        // console.log(relay.address)
-        console.log(await token.balanceOf(relay.address))
-        console.log(await token.balanceOf(vault.address))
-
-        expect(await token.balanceOf(vault.address)).to.equal(amount)
+        expect(await token.balanceOf(vaultAddress)).to.equal(amount)
     })
 })
