@@ -104,10 +104,10 @@ describe('ERC20Permit', function () {
             ]
         );
         const vaultAddress = await gelatoPineCore.vaultOfOrder(
-            vault.address,               // Limit orders module
-            token.address,               // Sell token 1
-            signer.address,              // Owner of the order
-            signer.address,              // Witness address
+            vault.address,
+            token.address,
+            signer.address,
+            signer.address,
             data
         );
 
