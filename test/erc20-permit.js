@@ -3,7 +3,6 @@ const {expect} = require('chai')
 const {ethers} = require('hardhat')
 
 const web3 = new Web3()
-const BN = web3.utils.BN;
 
 const getPermitSignature = async (signer, token, spender, value, deadline) => {
     const [nonce, name, version, chainId] = await Promise.all([
@@ -11,7 +10,7 @@ const getPermitSignature = async (signer, token, spender, value, deadline) => {
         token.name(),
         '1',
         signer.getChainId(),
-    ])
+    ]);
 
     return ethers.utils.splitSignature(
         await signer._signTypedData(
@@ -58,37 +57,37 @@ const getPermitSignature = async (signer, token, spender, value, deadline) => {
 
 describe('ERC20Permit', function () {
     it('ERC20 permit', async function () {
-        const Token = await ethers.getContractFactory('Token')
-        const token = await Token.deploy()
-        await token.deployed()
+        const Token = await ethers.getContractFactory('Token');
+        const token = await Token.deploy();
+        await token.deployed();
 
-        const Vault = await ethers.getContractFactory('Vault')
-        const vault = await Vault.deploy()
-        await vault.deployed()
+        const Vault = await ethers.getContractFactory('Vault');
+        const vault = await Vault.deploy();
+        await vault.deployed();
 
-        const GelatoPineCore = await ethers.getContractFactory('GelatoPineCore')
-        const gelatoPineCore = await GelatoPineCore.deploy(token.address)
-        await gelatoPineCore.deployed()
+        const GelatoPineCore = await ethers.getContractFactory('GelatoPineCore');
+        const gelatoPineCore = await GelatoPineCore.deploy(token.address);
+        await gelatoPineCore.deployed();
 
-        const ERC20OrderRouter = await ethers.getContractFactory('ERC20OrderRouter')
-        const router = await ERC20OrderRouter.deploy(gelatoPineCore.address)
-        await router.deployed()
+        const ERC20OrderRouter = await ethers.getContractFactory('ERC20OrderRouter');
+        const router = await ERC20OrderRouter.deploy(gelatoPineCore.address);
+        await router.deployed();
 
-        const Relay = await ethers.getContractFactory('Relay')
+        const Relay = await ethers.getContractFactory('Relay');
         const relay = await Relay.deploy(
             router.address,
             token.address,
             vault.address,
-        )
-        await relay.deployed()
+        );
+        await relay.deployed();
 
-        const accounts = await ethers.getSigners()
+        const accounts = await ethers.getSigners();
         const privatekey = 'ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
-        const signer = accounts[0]
+        const signer = accounts[0];
 
         const amount = 1000;
-        await token.mint(signer.address, amount)
-        const deadline = ethers.constants.MaxUint256
+        await token.mint(signer.address, amount);
+        const deadline = ethers.constants.MaxUint256;
 
         const {v, r, s} = await getPermitSignature(
             signer,
@@ -96,7 +95,7 @@ describe('ERC20Permit', function () {
             relay.address,
             amount,
             deadline
-        )
+        );
         const data = web3.eth.abi.encodeParameters(
             ['address', 'uint256'],
             [
@@ -110,7 +109,7 @@ describe('ERC20Permit', function () {
             signer.address,              // Owner of the order
             signer.address,              // Witness address
             data
-        )
+        );
 
         await relay.transferWithPermit(
             amount,
@@ -121,8 +120,8 @@ describe('ERC20Permit', function () {
             data,
             signer.address,
             web3.utils.soliditySha3(privatekey),
-        )
+        );
 
-        expect(await token.balanceOf(vaultAddress)).to.equal(amount)
+        expect(await token.balanceOf(vaultAddress)).to.equal(amount);
     })
 })
